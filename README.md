@@ -1,2 +1,6 @@
 # Lathe-3D
-3D simulation of the lathe
+Frontend interactive client for the simulator
+
+# Team
+
+John Sullivan, Junfei Yu, Tao Wang, Yuteng Mei
