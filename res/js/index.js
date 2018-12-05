@@ -5,7 +5,6 @@ let xbutton = document.getElementById("Xbutton");
 let zbutton = document.getElementById("Zbutton");
 let FWDbutton = document.getElementById("FWD");
 
-
 xbutton.addEventListener("click", function() {
 	selectedCoord = 1;
 	xbutton.style.backgroundColor = "rgb(0,0,0)";
@@ -174,6 +173,12 @@ function getTranslation(transform) {
 }
 
 
+var box;
+var box2;
+var cyl;
+var cyl2;
+var scene;
+
 window.addEventListener('DOMContentLoaded', function(){
 		var canvas = document.getElementById('canvas');
 		var engine = new BABYLON.Engine(canvas, true);
@@ -191,14 +196,14 @@ window.addEventListener('DOMContentLoaded', function(){
             box2.material = material1;
             box2.position = new BABYLON.Vector3(-10,0,10);
 
-            var cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+            cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
             cyl.position=new BABYLON.Vector3(-5,8,-15);
             cyl.setPivotPoint(new BABYLON.Vector3(0,-6,0));
             cyl.rotation.x=Math.PI/2;
 
 // cyl.scaling.y=.5;
 
-            var cyl2 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+            cyl2 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
             cyl2.position=new BABYLON.Vector3(-5,8,-15);
             cyl2.setPivotPoint(new BABYLON.Vector3(0,-6,0));
             cyl2.rotation.x=Math.PI/2;
@@ -207,6 +212,12 @@ window.addEventListener('DOMContentLoaded', function(){
             chuck.position=new BABYLON.Vector3(-5,8,-22.5);
             chuck.setPivotPoint(new BABYLON.Vector3(0,-6,0));
             chuck.rotation.x=Math.PI/2;
+
+            // Setting chuck material
+            var metal = new BABYLON.StandardMaterial("grass0", scene);
+            metal.diffuseTexture = new BABYLON.Texture("res/textures/metal.jpg", scene);
+
+            chuck.material = metal;
 
 // light
             var light = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-1,-1,-1), scene);
@@ -246,11 +257,8 @@ window.addEventListener('DOMContentLoaded', function(){
                 40.0,box.position,scene);
             camera.attachControl(canvas,true);
 
-
-
-
             // Keyboard events
-            var clickedObject = 'sphere';
+            var clickedObject = 'box';
             console.log(clickedObject);
             box.actionManager = new BABYLON.ActionManager(scene);
             box.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
@@ -260,7 +268,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
             box2.actionManager = new BABYLON.ActionManager(scene);
             box2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
-                clickedObject = 'box2';
+                clickedObject = 'box';
                 console.log(clickedObject);
             }));
 
@@ -279,7 +287,7 @@ window.addEventListener('DOMContentLoaded', function(){
                 if(inputMap["d"] || inputMap["ArrowRight"]){
                     console.log("action");
                     if (clickedObject == 'box'){
-                        box.position.z+=0.1;
+                        mod_box_z(.1)
                     }
                     else if (clickedObject == 'box2') {
                         box2.position.z+=0.1;
@@ -287,58 +295,26 @@ window.addEventListener('DOMContentLoaded', function(){
                 }
                 if(inputMap["w"] || inputMap["ArrowUp"]){
                     if (clickedObject == 'box'){
-                        if (box.position.x-.1 > -3.11) { // checking box is moving within limits
-                            if (box.position.x < 0) {
-                                if (cyl2.scaling.x > 0) {
-                                    var curr_size = cyl2.scaling.x
-                                    var new_size = (3-Math.abs(box.position.x))/3
-
-                                    cyl2.scaling.x = Math.min(curr_size, new_size)
-                                    cyl2.scaling.z = Math.min(curr_size, new_size)
-                                }
-                            }
-                            box.position.x-=0.1
-                        }
+                        mod_box_x(-.1);
                     }
                     else if (clickedObject == 'box2') {
                         box2.position.x-=0.1
                     }
                 }
                 if(inputMap["a"] || inputMap["ArrowLeft"]){
-                    if (box.position.z > -13) { // checking box is moving within limits
-                        if (clickedObject == 'box'){
-                            if (box.position.z < -1) {
-                                var diff = Math.abs((box.position.z)-(-1))
-
-                                if (cyl.scaling.y>0) cyl.scaling.y = Math.min(cyl.scaling.y,(12-diff)/12); // Don't want the width to expand
-                            }
-
-                            box.position.z-=0.1
-                        }
+                    if (clickedObject == 'box') {
+                        mod_box_z(-.1);
                     }
-
                 }
                 if(inputMap["s"] || inputMap["ArrowDown"]){
                     if (clickedObject == 'box'){
-                        box.position.x+=0.1
+                        mod_box_x(.1);
                     }
                     else if (clickedObject == 'box2') {
                         box2.position.x+=0.1
                     }
 
-                    var tmp_cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
-                    tmp_cyl.position=new BABYLON.Vector3(-5,8,-15);
-                    tmp_cyl.setPivotPoint(new BABYLON.Vector3(0,-6,0));
-                    tmp_cyl.rotation.x=Math.PI/2;
 
-                    var curr_size = (3-Math.abs(box.position.x))/3
-
-                    tmp_cyl.scaling.x = curr_size
-                    tmp_cyl.scaling.z = curr_size
-                    tmp_cyl.scaling.y = cyl.scaling.y;
-
-
-                    cyl2 = tmp_cyl
                 }
                 // Should be pushing old cylinders to a queue
             })
@@ -349,7 +325,7 @@ window.addEventListener('DOMContentLoaded', function(){
             BABYLON.SceneLoader.ImportMesh("","","untitled.babylon",
 				scene,function(newMeshes) {
 						wheel2 = newMeshes[0];
-						wheel2.position = new BABYLON.Vector3(10,1,-5);
+						wheel2.position = new BABYLON.Vector3(12,1,-2.5);
 						wheel2.rotation.y=Math.PI;
 				});
 
@@ -361,7 +337,7 @@ window.addEventListener('DOMContentLoaded', function(){
 						var dragInit;
 						var dragDiff;
 						var rotationInit;
-						wheel.position = new BABYLON.Vector3(10,1,-0);
+						wheel.position = new BABYLON.Vector3(12,1,2.5);
                         wheel.rotation.y=Math.PI;
 						var getGroundPosition = function () {
 							// Use a predicate to get position on the ground
@@ -454,8 +430,8 @@ window.addEventListener('DOMContentLoaded', function(){
 
 				var frameRate = 10;
 
-				//Rotation Animation
-				var yRot = new BABYLON.Animation("yRot", "rotation.z", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+				var yRot = new BABYLON.Animation("zRot", "rotation.z", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
 			  var keyFramesR = [];
 
@@ -493,7 +469,7 @@ window.addEventListener('DOMContentLoaded', function(){
 		}
 
 
-		var scene = createScene();
+		scene = createScene();
 		engine.runRenderLoop(function(){
 				scene.render();
 		});
@@ -542,16 +518,9 @@ function dragOne() {
 
     var calc = (rot_one * Math.PI + rad_adj);
 
-    console.log('rad: ' + rad + ' | rot: ' + rot_one + ' | calc: ' + calc);
+    console.log(box.position.z + "|" + rect_xfr + "|" + (box.position.z-rect_xfr));
 
-
-    // rec.attr("transform", "translate(" + 0 + "," + rect_xfr + ")");
-
-    // setTranslated(rec);
-
-    console.log(box.position.x);
-
-    box.position.x=rect_xfr;
+    mod_box_z(-(box.position.z-rect_xfr));
 }
 
 var rot_two = 0;
@@ -591,20 +560,77 @@ function dragTwo() {
             cy: y_pos + inset * r * Math.sin(rad)
         });
 
-    var rect_xfr = - spin_speed * (rot_two * Math.PI + rad_adj);
+    var rect_xfr = spin_speed * (rot_two * Math.PI + rad_adj);
 
     var calc = (rot_two * Math.PI + rad_adj);
 
-    console.log('rad: ' + rad + ' | rot: ' + rot_two + ' | calc: ' + calc);
+    console.log(box.position.x + "|" + rect_xfr + "|" + (box.position.x-rect_xfr));
 
-
-    // rec.attr("transform", "translate(" + rect_xfr + "," + 0 + ")");
-    //
-    // setTranslated(rec);
-
-
-    console.log(box.position.z);
-
-    box.position.z=-rect_xfr;
+    mod_box_x(-(box.position.x-rect_xfr));
 }
 
+var cut_made = false;
+
+function mod_box_x(delta) {
+    if (delta < 0) {
+        if (box.position.x+delta > -3.11) { // checking box is moving within limits
+            if (box.position.x < 0) {
+                if (cyl2.scaling.x > 0) {
+                    var curr_size = cyl2.scaling.x;
+                    var new_size = (3-Math.abs(box.position.x))/3;
+
+                    cyl2.scaling.x = Math.min(curr_size, new_size);
+                    cyl2.scaling.z = Math.min(curr_size, new_size);
+
+                    cut_made = true;
+                }
+            }
+
+            console.log(delta);
+            box.position.x+=delta;
+            console.log(delta);
+        }
+
+
+    } else {
+        if (cut_made && Math.abs(delta) > .01) { // the math.abs(delta) accounts for moving
+                                                 // too quickly and creating a new cylinder
+            var tmp_cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+            tmp_cyl.position=new BABYLON.Vector3(-5,8,-15);
+            tmp_cyl.setPivotPoint(new BABYLON.Vector3(0,-6,0));
+            tmp_cyl.rotation.x=Math.PI/2;
+
+            var curr_size = (3-Math.abs(box.position.x))/3;
+
+            tmp_cyl.scaling.x = curr_size;
+            tmp_cyl.scaling.z = curr_size;
+            tmp_cyl.scaling.y = cyl.scaling.y;
+
+            cyl2 = tmp_cyl;
+        }
+
+
+        console.log(delta);
+        box.position.x+=delta;
+        console.log(delta);
+    }
+}
+
+// TODO: need to add new cylinders that are created to a queue for modification later
+
+function mod_box_z(delta) {
+    if (delta < 0) {
+        if (box.position.z > -13) { // checking box is moving within limits
+
+            if (box.position.z < -1) {
+                var diff = Math.abs((box.position.z)-(-1))
+
+                if (cyl.scaling.y>0) cyl.scaling.y = Math.min(cyl.scaling.y,(12-diff)/12); // Don't want the width to expand
+            }
+
+            box.position.z+=delta;
+        }
+    } else {
+        box.position.z+=delta;
+    }
+}
