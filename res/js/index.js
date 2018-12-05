@@ -568,7 +568,7 @@ function dragTwo() {
             cy: y_pos + inset * r * Math.sin(rad)
         });
 
-    var rect_xfr = spin_speed * (rot_two * Math.PI + rad_adj);
+    var rect_xfr = - spin_speed * (rot_two * Math.PI + rad_adj);
 
     var calc = (rot_two * Math.PI + rad_adj);
 
