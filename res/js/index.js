@@ -1,3 +1,7 @@
+/**
+ * Code for the control
+ */
+
 let videoCounter = 0;
 let selectedCoord = 0;
 let FWDOn = 0;
@@ -52,6 +56,10 @@ function setAbsPos(element) {
 	}
 }
 
+/**
+ * Code to switch the videos
+ */
+
 function switchVideo(element) {
 	videoCounter += 1;
 	let video_1 = document.getElementById("videoList_1");
@@ -82,96 +90,9 @@ function switchVideo(element) {
 	}
 }
 
-var r = 100;
-var padding = 5;
-var inset = .7 ;
-var pos_wheel_2 = 250;
-var y_pos = 10;
-var spin_speed = 1;
-
-var dragOne = d3.behavior.drag()
-    .on('drag', dragOne);
-
-var dragTwo = d3.behavior.drag()
-    .on('drag', dragTwo);
-
-var g = d3.select('svg')
-    .attr({
-        width: 1000,
-        height: 250
-    })
-    .append('g')
-    .attr('transform', 'translate(' + (r + padding) + ',' + (r + padding) + ')');
-
-g.append('circle')
-    .attr({
-        class: 'outer1',
-        r: r,
-        cy: y_pos
-    });
-
-g.append('circle')
-    .attr({
-        class: 'rotatable1',
-        r: 15,
-        cx: inset * r * Math.cos(0),
-        cy: y_pos + inset * r * Math.sin(0),
-    })
-    .call(dragOne);
-
-g.append('circle')
-    .attr({
-        class: 'outer2',
-        r: r,
-        cx: pos_wheel_2,
-        cy: y_pos
-    });
-
-g.append('circle')
-    .attr({
-        class: 'rotatable2',
-        r: 15,
-        cx: pos_wheel_2 + inset * r * Math.cos(0),
-        cy: y_pos + inset * r * Math.sin(0),
-    })
-    .call(dragTwo);
-
-// store initial points
-var xInit1 = d3.select('.rotatable1').attr('cx');
-var yInit1 = d3.select('.rotatable1').attr('cy');
-
-var xInit2 = d3.select('.rotatable2').attr('cx');
-var yInit2 = d3.select('.rotatable2').attr('cy');
-
-
-// reset location of rotatable circle
-function reset() {
-    d3.select('.rotatable1')
-        .attr({
-            cx: xInit1,
-            cy: yInit1
-        });
-
-    d3.select('.rotatable2')
-        .attr({
-            cx: xInit2,
-            cy: yInit2
-        });
-
-    rec.attr({
-        x: rec_init_x,
-        y: rec_init_y
-    })
-}
-
-
-function getTranslation(transform) {
-    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.setAttributeNS(null, "transform", transform);
-    var matrix = g.transform.baseVal.consolidate().matrix;
-    return [matrix.e, matrix.f];
-}
-
+/**
+ * BabylonJS code
+ */
 
 var box;
 var box2;
@@ -477,6 +398,93 @@ window.addEventListener('DOMContentLoaded', function(){
 });
 
 
+/**
+ * Code for the D3 wheels
+ */
+
+var r = 100;
+var padding = 5;
+var inset = .7 ;
+var pos_wheel_2 = 250;
+var y_pos = 10;
+var spin_speed = 1;
+
+var dragOne = d3.behavior.drag()
+    .on('drag', dragOne);
+
+var dragTwo = d3.behavior.drag()
+    .on('drag', dragTwo);
+
+var g = d3.select('svg')
+    .attr({
+        width: 1000,
+        height: 225
+    })
+    .append('g')
+    .attr('transform', 'translate(' + (r + padding) + ',' + (r + padding) + ')');
+
+g.append('circle')
+    .attr({
+        class: 'outer1',
+        r: r,
+        cy: y_pos
+    });
+
+g.append('circle')
+    .attr({
+        class: 'rotatable1',
+        r: 15,
+        cx: inset * r * Math.cos(0),
+        cy: y_pos + inset * r * Math.sin(0),
+    })
+    .call(dragOne);
+
+g.append('circle')
+    .attr({
+        class: 'outer2',
+        r: r,
+        cx: pos_wheel_2,
+        cy: y_pos
+    });
+
+g.append('circle')
+    .attr({
+        class: 'rotatable2',
+        r: 15,
+        cx: pos_wheel_2 + inset * r * Math.cos(0),
+        cy: y_pos + inset * r * Math.sin(0),
+    })
+    .call(dragTwo);
+
+// store initial points
+var xInit1 = d3.select('.rotatable1').attr('cx');
+var yInit1 = d3.select('.rotatable1').attr('cy');
+
+var xInit2 = d3.select('.rotatable2').attr('cx');
+var yInit2 = d3.select('.rotatable2').attr('cy');
+
+
+// reset location of rotatable circle
+function reset() {
+    d3.select('.rotatable1')
+        .attr({
+            cx: xInit1,
+            cy: yInit1
+        });
+
+    d3.select('.rotatable2')
+        .attr({
+            cx: xInit2,
+            cy: yInit2
+        });
+
+    rec.attr({
+        x: rec_init_x,
+        y: rec_init_y
+    })
+}
+
+
 var rot_one = 0;
 var rad_prev_one = 0;
 
@@ -568,6 +576,10 @@ function dragTwo() {
 
     mod_box_x(-(box.position.x-rect_xfr));
 }
+
+/**
+ * Code for making cutting tool movements in x and z directions
+ */
 
 var cut_made = false;
 
