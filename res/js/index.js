@@ -132,12 +132,11 @@ window.addEventListener('DOMContentLoaded', function(){
             var chuck = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 3, diameter: 30}, scene);
             chuck.position=new BABYLON.Vector3(-5,8,-22.5);
             chuck.setPivotPoint(new BABYLON.Vector3(0,-6,0));
-            chuck.rotation.x=Math.PI/2;
+						chuck.rotate(BABYLON.Axis.X, Math.PI/2, BABYLON.Space.WORLD);
 
             // Setting chuck material
             var metal = new BABYLON.StandardMaterial("grass0", scene);
             metal.diffuseTexture = new BABYLON.Texture("res/textures/metal.jpg", scene);
-
             chuck.material = metal;
 
 // light
@@ -352,7 +351,7 @@ window.addEventListener('DOMContentLoaded', function(){
 				var frameRate = 10;
 
 
-				var yRot = new BABYLON.Animation("zRot", "rotation.z", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+				var yRot = new BABYLON.Animation("zRot", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
 			  var keyFramesR = [];
 
@@ -376,12 +375,12 @@ window.addEventListener('DOMContentLoaded', function(){
 				var music = new BABYLON.Sound("FWDSound", "res/sounds/5959.mp3", scene, null, { loop: true, autoplay: false });
 				document.getElementById("FWD").addEventListener("click",function () {
 					 if(fwdOn){
-						 scene.stopAnimation(box2);
+						 scene.stopAnimation(chuck);
 						 music.stop();
 						 fwdOn = 0;
 					 }
 					 else{
-						 scene.beginDirectAnimation(box2, [yRot], 0, 2 * frameRate, true);
+						 scene.beginDirectAnimation(chuck, [yRot], 0, 2 * frameRate, true);
 						 music.play();
 						 fwdOn = 1;
 					 }
