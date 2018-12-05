@@ -6,8 +6,12 @@ body {
   height:100%;
 }
 canvas#canvas {
-    width: 100%;
+    width: 98%;
     height: 60%;
+}
+
+.split.left {
+    text-align: center;
 }
 
 .split.right {
@@ -654,4 +658,25 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
 }
 .videoList_1, .videoList_2, .videoList_3, .videoList_4, .videoList_5, .videoList_end{
   display: none;
+}
+
+
+.outer1 {
+    fill: black;
+}
+
+.outer2 {
+    fill: #5D5D5D;
+}
+
+.rotatable1 {
+    fill: #5D5D5D;
+}
+
+.rotatable2 {
+    fill: black;
+}
+
+.cutting_tool {
+    fill: #323232;
 }

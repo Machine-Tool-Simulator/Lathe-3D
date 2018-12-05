@@ -83,6 +83,97 @@ function switchVideo(element) {
 	}
 }
 
+var r = 100;
+var padding = 5;
+var inset = .7 ;
+var pos_wheel_2 = 250;
+var y_pos = 10;
+var spin_speed = 1;
+
+var dragOne = d3.behavior.drag()
+    .on('drag', dragOne);
+
+var dragTwo = d3.behavior.drag()
+    .on('drag', dragTwo);
+
+var g = d3.select('svg')
+    .attr({
+        width: 1000,
+        height: 250
+    })
+    .append('g')
+    .attr('transform', 'translate(' + (r + padding) + ',' + (r + padding) + ')');
+
+g.append('circle')
+    .attr({
+        class: 'outer1',
+        r: r,
+        cy: y_pos
+    });
+
+g.append('circle')
+    .attr({
+        class: 'rotatable1',
+        r: 15,
+        cx: inset * r * Math.cos(0),
+        cy: y_pos + inset * r * Math.sin(0),
+    })
+    .call(dragOne);
+
+g.append('circle')
+    .attr({
+        class: 'outer2',
+        r: r,
+        cx: pos_wheel_2,
+        cy: y_pos
+    });
+
+g.append('circle')
+    .attr({
+        class: 'rotatable2',
+        r: 15,
+        cx: pos_wheel_2 + inset * r * Math.cos(0),
+        cy: y_pos + inset * r * Math.sin(0),
+    })
+    .call(dragTwo);
+
+// store initial points
+var xInit1 = d3.select('.rotatable1').attr('cx');
+var yInit1 = d3.select('.rotatable1').attr('cy');
+
+var xInit2 = d3.select('.rotatable2').attr('cx');
+var yInit2 = d3.select('.rotatable2').attr('cy');
+
+
+// reset location of rotatable circle
+function reset() {
+    d3.select('.rotatable1')
+        .attr({
+            cx: xInit1,
+            cy: yInit1
+        });
+
+    d3.select('.rotatable2')
+        .attr({
+            cx: xInit2,
+            cy: yInit2
+        });
+
+    rec.attr({
+        x: rec_init_x,
+        y: rec_init_y
+    })
+}
+
+
+function getTranslation(transform) {
+    var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttributeNS(null, "transform", transform);
+    var matrix = g.transform.baseVal.consolidate().matrix;
+    return [matrix.e, matrix.f];
+}
+
+
 window.addEventListener('DOMContentLoaded', function(){
 		var canvas = document.getElementById('canvas');
 		var engine = new BABYLON.Engine(canvas, true);
@@ -91,18 +182,175 @@ window.addEventListener('DOMContentLoaded', function(){
 		var createScene = function(){
 				var scene = new BABYLON.Scene(engine);
 				scene.clearColor = new BABYLON.Color3.White();
-				var box2 = BABYLON.Mesh.CreateBox("Box2",4,scene);
-				var material = new BABYLON.StandardMaterial("material1",scene);
-				var wheel;
-				var wheel2;
-				// Ground
-				var ground = BABYLON.Mesh.CreateGround("ground", 100, 100, 1, scene, false);
-				ground.position.y = -.01;
 
-				BABYLON.SceneLoader.ImportMesh("","","untitled.babylon",
+
+				box = BABYLON.Mesh.CreateBox("Box",4.0,scene);
+				box2 = BABYLON.Mesh.CreateBox("Box2",4.0,scene);
+            var material1 = new BABYLON.StandardMaterial("material",scene);
+            material1.wireframe = true;
+            box2.material = material1;
+            box2.position = new BABYLON.Vector3(-10,0,10);
+
+            var cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+            cyl.position=new BABYLON.Vector3(-5,8,-15);
+            cyl.setPivotPoint(new BABYLON.Vector3(0,-6,0));
+            cyl.rotation.x=Math.PI/2;
+
+// cyl.scaling.y=.5;
+
+            var cyl2 = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+            cyl2.position=new BABYLON.Vector3(-5,8,-15);
+            cyl2.setPivotPoint(new BABYLON.Vector3(0,-6,0));
+            cyl2.rotation.x=Math.PI/2;
+
+            var chuck = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 3, diameter: 30}, scene);
+            chuck.position=new BABYLON.Vector3(-5,8,-22.5);
+            chuck.setPivotPoint(new BABYLON.Vector3(0,-6,0));
+            chuck.rotation.x=Math.PI/2;
+
+// light
+            var light = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-1,-1,-1), scene);
+            light.position = new BABYLON.Vector3(20, 40, 20);
+
+// sphere for positioning properly
+            var lightSphere = BABYLON.Mesh.CreateSphere("sphere", 10, 2, scene);
+            lightSphere.position = light.position;
+            lightSphere.material = new BABYLON.StandardMaterial("light", scene);
+            lightSphere.material.emissiveColor = new BABYLON.Color3(1, 1, 0);
+
+            light.intensity=1;
+
+            var material2 = new BABYLON.StandardMaterial("std", scene);
+            material2.diffuseColor = new BABYLON.Color3(0.5, 1, 0.5);
+
+            box.material=material2;
+
+// Shadows
+            var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+            shadowGenerator.getShadowMap().renderList.push(box);
+// shadowGenerator.getShadowMap().renderList.push(box2)
+// shadowGenerator.getShadowMap().renderList.push(cyl);
+            shadowGenerator.useBlurExponentialShadowMap = true;
+            shadowGenerator.useKernelBlur = true;
+            shadowGenerator.blurKernel = 64;
+
+// Ground
+            var ground = BABYLON.Mesh.CreateGround("ground", 100, 100, 1, scene, false);
+            ground.position.y = -2;
+
+            ground.receiveShadows = true;
+
+            var camera = new BABYLON.ArcRotateCamera("arcCam",
+                0,
+                BABYLON.Tools.ToRadians(60),
+                40.0,box.position,scene);
+            camera.attachControl(canvas,true);
+
+
+
+
+            // Keyboard events
+            var clickedObject = 'sphere';
+            console.log(clickedObject);
+            box.actionManager = new BABYLON.ActionManager(scene);
+            box.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                clickedObject = 'box';
+                console.log(clickedObject);
+            }));
+
+            box2.actionManager = new BABYLON.ActionManager(scene);
+            box2.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, function () {
+                clickedObject = 'box2';
+                console.log(clickedObject);
+            }));
+
+            var inputMap ={};
+            scene.actionManager = new BABYLON.ActionManager(scene);
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                console.log("trigger");
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+
+// Game/Render loop
+            scene.onBeforeRenderObservable.add(()=>{
+                if(inputMap["d"] || inputMap["ArrowRight"]){
+                    console.log("action");
+                    if (clickedObject == 'box'){
+                        box.position.z+=0.1;
+                    }
+                    else if (clickedObject == 'box2') {
+                        box2.position.z+=0.1;
+                    }
+                }
+                if(inputMap["w"] || inputMap["ArrowUp"]){
+                    if (clickedObject == 'box'){
+                        if (box.position.x-.1 > -3.11) { // checking box is moving within limits
+                            if (box.position.x < 0) {
+                                if (cyl2.scaling.x > 0) {
+                                    var curr_size = cyl2.scaling.x
+                                    var new_size = (3-Math.abs(box.position.x))/3
+
+                                    cyl2.scaling.x = Math.min(curr_size, new_size)
+                                    cyl2.scaling.z = Math.min(curr_size, new_size)
+                                }
+                            }
+                            box.position.x-=0.1
+                        }
+                    }
+                    else if (clickedObject == 'box2') {
+                        box2.position.x-=0.1
+                    }
+                }
+                if(inputMap["a"] || inputMap["ArrowLeft"]){
+                    if (box.position.z > -13) { // checking box is moving within limits
+                        if (clickedObject == 'box'){
+                            if (box.position.z < -1) {
+                                var diff = Math.abs((box.position.z)-(-1))
+
+                                if (cyl.scaling.y>0) cyl.scaling.y = Math.min(cyl.scaling.y,(12-diff)/12); // Don't want the width to expand
+                            }
+
+                            box.position.z-=0.1
+                        }
+                    }
+
+                }
+                if(inputMap["s"] || inputMap["ArrowDown"]){
+                    if (clickedObject == 'box'){
+                        box.position.x+=0.1
+                    }
+                    else if (clickedObject == 'box2') {
+                        box2.position.x+=0.1
+                    }
+
+                    var tmp_cyl = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 12, diameter: 6}, scene);
+                    tmp_cyl.position=new BABYLON.Vector3(-5,8,-15);
+                    tmp_cyl.setPivotPoint(new BABYLON.Vector3(0,-6,0));
+                    tmp_cyl.rotation.x=Math.PI/2;
+
+                    var curr_size = (3-Math.abs(box.position.x))/3
+
+                    tmp_cyl.scaling.x = curr_size
+                    tmp_cyl.scaling.z = curr_size
+                    tmp_cyl.scaling.y = cyl.scaling.y;
+
+
+                    cyl2 = tmp_cyl
+                }
+                // Should be pushing old cylinders to a queue
+            })
+
+
+
+
+            BABYLON.SceneLoader.ImportMesh("","","untitled.babylon",
 				scene,function(newMeshes) {
 						wheel2 = newMeshes[0];
-						wheel2.position = new BABYLON.Vector3(-15,2,-5);
+						wheel2.position = new BABYLON.Vector3(10,1,-5);
+						wheel2.rotation.y=Math.PI;
 				});
 
 				BABYLON.SceneLoader.ImportMesh("","","untitled.babylon",
@@ -113,7 +361,8 @@ window.addEventListener('DOMContentLoaded', function(){
 						var dragInit;
 						var dragDiff;
 						var rotationInit;
-						wheel.position = new BABYLON.Vector3(-15,2,-0);
+						wheel.position = new BABYLON.Vector3(10,1,-0);
+                        wheel.rotation.y=Math.PI;
 						var getGroundPosition = function () {
 							// Use a predicate to get position on the ground
 							var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == ground; });
@@ -177,19 +426,19 @@ window.addEventListener('DOMContentLoaded', function(){
 							console.log(currentMesh.rotation);
 							if(currentMesh.rotation.x>currentMeshX){
 								if (currentMesh == wheel){
-									box2.position.z+=0.1;
+									box2.position.x+=0.1;
 								}
 								else if (currentMesh == wheel2) {
-									box2.position.x+=0.1;
+									box2.position.z-=0.1;
 								}
 
 							}
 							else if (currentMesh.rotation.x<currentMeshX) {
 								if (currentMesh == wheel){
-									box2.position.z-=0.1;
+									box2.position.x-=0.1;
 								}
 								else if (currentMesh == wheel2) {
-									box2.position.x-=0.1;
+									box2.position.z+=0.1;
 								}
 							}
 
@@ -201,26 +450,6 @@ window.addEventListener('DOMContentLoaded', function(){
 						canvas.addEventListener("pointermove", onPointerMove, false);
 
 				});
-
-
-
-				material.wireframe = true;
-				var box1 = BABYLON.Mesh.CreateBox("Box1",4,scene);
-				box1.position = new BABYLON.Vector3(-5,2,-0);
-				box2.material = material;
-				box2.position = new BABYLON.Vector3(-5,2,-10);
-
-
-				// var light = new BABYLON.PointLight("pointlight",new BABYLON.Vector3(0,10,0),scene);
-				// light.parent = camera;
-				// light.diffuse = new BABYLON.Color3(1,1,1);
-				var light2 = new BABYLON.PointLight("pointlight",new BABYLON.Vector3(-25,10,0),scene);
-				light2.diffuse = new BABYLON.Color3(1,1,1);
-        var camera = new BABYLON.ArcRotateCamera("Camera", -2.3, 1.1, 30, new BABYLON.Vector3.Zero(), scene);
-				camera.setPosition(new BABYLON.Vector3(-30, 10, -5));
-				camera.attachControl(canvas,true);
-
-
 
 
 				var frameRate = 10;
@@ -250,12 +479,12 @@ window.addEventListener('DOMContentLoaded', function(){
 				var music = new BABYLON.Sound("FWDSound", "res/sounds/5959.mp3", scene, null, { loop: true, autoplay: false });
 				document.getElementById("FWD").addEventListener("click",function () {
 					 if(fwdOn){
-						 scene.stopAnimation(box1);
+						 scene.stopAnimation(box2);
 						 music.stop();
 						 fwdOn = 0;
 					 }
 					 else{
-						 scene.beginDirectAnimation(box1, [yRot], 0, 2 * frameRate, true);
+						 scene.beginDirectAnimation(box2, [yRot], 0, 2 * frameRate, true);
 						 music.play();
 						 fwdOn = 1;
 					 }
@@ -263,9 +492,119 @@ window.addEventListener('DOMContentLoaded', function(){
 				return scene;
 		}
 
+
 		var scene = createScene();
 		engine.runRenderLoop(function(){
 				scene.render();
 		});
 
 });
+
+
+var rot_one = 0;
+var rad_prev_one = 0;
+
+function dragOne() {
+    // calculate delta for mouse coordinates
+    var deltaX = d3.event.x;
+    var deltaY = d3.event.y - y_pos;
+
+    var rad = Math.atan2(deltaY, deltaX);
+
+    if (rad_prev_one >= 2.7) {
+        if (rad < -2.7) {
+            if (rot_one === -1) rot_one = 0;
+            else rot_one = rot_one !== 0 ? rot_one + 2 : rot_one + 1;
+        }
+    } else if (rad_prev_one <= -2.7) {
+        if (rad > 2.7) {
+            if (rot_one === 1) rot_one = 0;
+            else rot_one = rot_one !== 0 ? rot_one - 2 : rot_one - 1;
+        }
+    }
+
+    var rad_adj;
+
+    if (rot_one > 0) rad_adj = Math.PI + rad;
+    else if (rot_one < 0) rad_adj = rad - Math.PI;
+    else rad_adj = rad;
+
+    rad_prev_one = rad;
+
+
+    d3.select(this)
+        .attr({
+            cx: inset * r * Math.cos(rad),
+            cy: y_pos + inset * r * Math.sin(rad)
+        });
+
+    var rect_xfr = spin_speed * (rot_one * Math.PI + rad_adj);
+
+    var calc = (rot_one * Math.PI + rad_adj);
+
+    console.log('rad: ' + rad + ' | rot: ' + rot_one + ' | calc: ' + calc);
+
+
+    // rec.attr("transform", "translate(" + 0 + "," + rect_xfr + ")");
+
+    // setTranslated(rec);
+
+    console.log(box.position.x);
+
+    box.position.x=rect_xfr;
+}
+
+var rot_two = 0;
+var rad_prev_two = 0;
+
+function dragTwo() {
+    // calculate delta for mouse coordinates
+    var deltaX = d3.event.x-pos_wheel_2;
+    var deltaY = d3.event.y - y_pos;
+
+    var rad = Math.atan2(deltaY, deltaX);
+
+    if (rad_prev_two >= 2.7) {
+        if (rad < -2.7) {
+            if (rot_two === -1) rot_two = 0;
+            else rot_two = rot_two !== 0 ? rot_two + 2 : rot_two + 1;
+        }
+    } else if (rad_prev_two <= -2.7) {
+        if (rad > 2.7) {
+            if (rot_two === 1) rot_two = 0;
+            else rot_two = rot_two !== 0 ? rot_two - 2 : rot_two - 1;
+        }
+    }
+
+    var rad_adj;
+
+    if (rot_two > 0) rad_adj = Math.PI + rad;
+    else if (rot_two < 0) rad_adj = rad - Math.PI;
+    else rad_adj = rad;
+
+    rad_prev_two = rad;
+
+
+    d3.select(this)
+        .attr({
+            cx: pos_wheel_2 + inset * r * Math.cos(rad),
+            cy: y_pos + inset * r * Math.sin(rad)
+        });
+
+    var rect_xfr = - spin_speed * (rot_two * Math.PI + rad_adj);
+
+    var calc = (rot_two * Math.PI + rad_adj);
+
+    console.log('rad: ' + rad + ' | rot: ' + rot_two + ' | calc: ' + calc);
+
+
+    // rec.attr("transform", "translate(" + rect_xfr + "," + 0 + ")");
+    //
+    // setTranslated(rec);
+
+
+    console.log(box.position.z);
+
+    box.position.z=-rect_xfr;
+}
+
