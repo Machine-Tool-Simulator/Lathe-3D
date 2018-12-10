@@ -9,7 +9,7 @@
  let powerfeedSelected = 0;
  let pressed = '';
  let sequence = [];
- let sequenceIdx = 1;
+ let sequenceIdx = 0;
 
  let xbutton = getById('Xbutton');
  let zbutton = getById('Zbutton');
@@ -648,25 +648,29 @@ window.addEventListener('DOMContentLoaded', function(){
 				var fwdOn = 0;
 				var music = new BABYLON.Sound("FWDSound", "res/sounds/5959.mp3", scene, null, { loop: true, autoplay: false });
 				document.getElementById("FWD").addEventListener("click",function () {
-					 if(fwdOn){
-						 scene.stopAnimation(chuck);
-						 music.stop();
-						 fwdOn = 0;
-					 }
-					 else{
-						 scene.beginDirectAnimation(chuck, [yRot], 0, 2 * frameRate, true);
-						 music.play();
-						 fwdOn = 1;
-					 }
+						scene.beginDirectAnimation(chuck, [yRot], 0, 2 * frameRate, true);
+						music.play();
+						fwdOn = 1;
+
 				 });
+
+         document.getElementById("off").addEventListener("click",function () {
+              scene.stopAnimation(chuck);
+              music.stop();
+              fwdOn = 0;
+          });
 
 // Implement GOTO animation;
          for (i = 0; i < GoTofunction.length; i++) {
               GoTofunction[i].addEventListener('click', function() {
+                console.log('---------------');
+                console.log(sequenceIdx-1);
+                console.log(sequence[sequenceIdx-1]);
               if (this.id != sequence[sequenceIdx-1]){
                 sequence.push(this.id);
                 pressed += this.id;
                 sequenceIdx +=1;
+                console.log(sequence);
               }
 
               if (pressed == "f4btnXbuttonnumButtonAbsSetZbuttonnumButtonAbsSet"
