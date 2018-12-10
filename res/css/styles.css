@@ -1,3 +1,9 @@
+
+canvas#canvas {
+    width: 100%;
+    height: 60%;
+}
+
 html {
   height: 70%;
 }
@@ -5,14 +11,7 @@ html {
 body {
   height:100%;
 }
-canvas#canvas {
-    width: 98%;
-    height: 60%;
-}
 
-.split.left {
-    text-align: center;
-}
 
 .split.right {
     background: #515151;
@@ -20,6 +19,10 @@ canvas#canvas {
 
 section {
   border-radius: 5px;
+}
+
+p {
+  text-align: left;
 }
 
 .leftControlBtn {
@@ -152,35 +155,51 @@ input#xvar {
   border: 1px solid #978484!important;
   border-radius: 5px;
   height: 50px;
-  width:80px;
+  width:120px;
+    margin:40% 0 0 0;
 }
 
 input#zvar {
   border: 1px solid #978484!important;
   border-radius: 5px;
   height: 50px;
-  width: 80px;
+  width: 120px;
+    margin:0 0 10% 0;
 }
 
 label {
   font-size: 20px;
 }
 
+.XZ-coord {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .text_row1 {
-  display: flex;
-  flex-direction: row;
-  height: 50%;
-  align-items: flex-start;
-  justify-content: space-between;
+    display: flex;
+      flex-direction: row;
+      height: 50%;
+      align-items: flex-start;
+      justify-content: space-between;
+      /* margin: 0 10% 0; */
 }
 
 p#p1 {
     width: 30%;
+    margin-left: 5px;
 }
+
+p#p2 {
+    width: 30%;
+    margin-left: 29px;
+}
+
 label#tx1 {
     font-size: 10px;
 }
-input#rmp {
+input#rpm {
     width: 30%;
 }
 input#overrite {
@@ -190,12 +209,12 @@ input#frate {
   width: 30%;
 }
 .text-field {
-    height: 20%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+      height: 20%;
 }
-p#p2 {
-    width: 30%;
-    margin-left: 12px;
-}
+
 
 input {
   font-family:Helvetica, Arial, sans-serif;
@@ -215,11 +234,11 @@ input {
   /* margin: 0 0 10px 0; */
 }
 
-input#coord-buffer {
+input#buffer {
     width: 35%;
     height: 4%;
     position: absolute;
-    bottom: 78px;
+    bottom: 58px;
     right: 0;
 }
 
@@ -356,28 +375,25 @@ button#Xbutton, #Zbutton {
 .keyboard {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-evenly;
-  width: 89%;
+  width: 100%;
   height: 50%;
   flex: 2;
   background: #3a3732;
   border-radius: 5px;
-  margin: 4px;
-  /* margin: 150px 5px; */
 }
 
 .leftKeybord {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-    width: 100%;
-    height: 90%;
-    flex: 2;
-    /* background: #3a3732; */
-    border-radius: 5px;
-    /* margin: 150px 5px; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 90%;
+  flex: 2;
+  border-radius: 5px;
+  margin-left: 5px;
 }
 
 
@@ -387,7 +403,7 @@ button#Xbutton, #Zbutton {
     align-items: flex-start;
     border-radius: 5px;
     background: #3a3732;
-    width: 89%;
+    width: 100%;
     margin-top: 7px;
     clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0);
 }
@@ -397,7 +413,7 @@ button#Xbutton, #Zbutton {
     flex-direction: row;
     border-radius: 5px;
     background: #3a3732;
-    width: 89%;
+    width: 100%;
     margin-top: 10px;
     margin-bottom: 10px;
 
@@ -406,19 +422,21 @@ button#Xbutton, #Zbutton {
 .btn{
   display: flex;
   flex-direction: row;
-
+  width:100%;
 }
 
 .row {
   display: flex;
   flex-direction: row;
-
+  width: 100%;
+  height: 20%;
 }
 
 .sbutton {
   background-color: #657a8f;
   border: none;
   color: white;
+  width:33.3%;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -427,10 +445,11 @@ button#Xbutton, #Zbutton {
   margin: 4px 5px;
   font-weight: bold;
   cursor: pointer;
+  background-image: url("res/imgs/UA.png");
   background-repeat:no-repeat;
 }
-.sbutton:hover, .rbtn:hover, .rbtn:hover, .accbutton:hover, .fbutton:hover, .subbutton:hover, .buttonp:hover,.XZbutton:hover,.buttonp:hover,
-.buttonr:hover,.buttona:hover,.buttond:hover,.rbtn1:hover {
+.sbutton:hover, .rbtn:hover, .rbtn:hover, .accbutton:hover, .fbutton:hover, .subbutton:hover, .XZbutton:hover,
+.rbtn1:hover {
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
@@ -497,11 +516,13 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
 
 #GO {
     padding: 10px 23px;
+    width: 50%;
 }
 
 #STOP {
     padding: 10px 16px;
     background: #fc494a;
+    width: 50%;
 }
 #row1{
   width:20%
@@ -524,6 +545,7 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
   border: none;
   color: white;
   padding: 10px 28px;
+  width: 33.3%;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -534,76 +556,17 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
   cursor: pointer;
 }
 
+#restorebtn{
+    width:67.7%;
+    background-color: #657a8f;
 
-.buttonp {
-  border-radius: 7px;
-  background-color: #657a8f;
-  border: none;
-  color: white;
-  padding: 10px 23px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 2px 5px;
-  cursor: pointer;
-  font-weight: bold;
 }
 
-.buttonr {
-  border-radius: 7px;
-  background-color: #657a8f;
-  border: none;
-  color: white;
-  padding: 5px 44px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 12px;
-  margin: 4px 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.buttona {
-  border-radius: 7px;
-  background-color: #ecd2af;
-  border: none;
-  color: white;
-  padding: 10px 25px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 5px;
-  cursor: pointer;
-  font-weight: bold;
+#abtn{
+    background-color: #ecd2af;
 }
 
 
-.buttond {
-  border-radius: 7px;
-  background-color: #657a8f;
-  border: none;
-  color: white;
-  padding: 10px 30px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 2px 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-
-.video{
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-  border-radius: 7px;
-  background-color: #657a8f;
-  display: flex;
-  flex-direction: column;
-}
 
 /* Split the screen in half */
 .split {
@@ -612,14 +575,6 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
   z-index: 1;
   top: 0;
   overflow-x: scroll;
-  padding-top: 20px;
-}
-
-/* Control the left side */
-.left {
-  left: 0;
-  width: 40%;
-  background-color: white;
 }
 
 /* Control the right side */
@@ -632,32 +587,8 @@ clip-path: polygon(47% 0, 56% 15%, 100% 14%, 100% 100%, 0 100%, 0 0); */
   flex-direction:column;
 }
 
-/* If you want the content centered horizontally and vertically */
-.centered {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
 
-/* Style the image inside the centered container, if needed */
-.centered img {
-  width: 500px;
-  border-radius: 50%;
-}
 
-.h2 {
-  color: white;
-}
-
-#myContainer{
-  zoom: 0.5;
-  -moz-transform: scale(0.5);
-}
-.videoList_1, .videoList_2, .videoList_3, .videoList_4, .videoList_5, .videoList_end{
-  display: none;
-}
 
 
 .outer1 {

@@ -2,93 +2,366 @@
  * Code for the control
  */
 
-let videoCounter = 0;
-let selectedCoord = 0;
-let FWDOn = 0;
-let xbutton = document.getElementById("Xbutton");
-let zbutton = document.getElementById("Zbutton");
-let FWDbutton = document.getElementById("FWD");
+ let videoCounter = 0;
+ let selectedCoord = 0;
+ let gotoSelected = 0;
+ let dooneSelected = 0;
+ let powerfeedSelected = 0;
+ let pressed = '';
+ let sequence = [];
+ let sequenceIdx = 1;
 
-xbutton.addEventListener("click", function() {
-	selectedCoord = 1;
-	xbutton.style.backgroundColor = "rgb(0,0,0)";
-	zbutton.style.backgroundColor = "rgb(85,80,74)";
-	console.log("X coord");
-});
+ let xbutton = getById('Xbutton');
+ let zbutton = getById('Zbutton');
 
-zbutton.addEventListener("click", function() {
-	selectedCoord = 2;
-	zbutton.style.backgroundColor = "rgb(0,0,0)";
-	xbutton.style.backgroundColor = "rgb(236,210,175)";
-	console.log("Y coord");
-});
+ let powerfeedbutton = getById('f2btn');
+ let doonebutton = getById('f3btn');
+ let gotobutton = getById('f4btn');
+ let restorebutton = getById('f6btn');
+ let rpmbutton = getById('f7btn');
+ let toolretbutton = getById('f8btn');
+ let coarsespeedbutton = getById('FC');
 
-function numberPressed(element){
-	let buffer = document.getElementById('coord-buffer');
-	buffer.value = addNumber(buffer.value, element.value);
-}
 
-function addNumber(current, digit) {
-	// TODO: actually add the calculator function
-	return current + digit;
-}
+ let canSubmit = true;
+ let currentTasks = null;
+ let taskIndex = 0;
+ let xCoordinate = getById('xvar');
+ let zCoordinate = getById('zvar');
+ let GoTofunction = document.querySelectorAll("#f4btn, #Xbutton, #numButton, #AbsSet, #Zbutton"),i;
+ /** Initialization */
+ window.onload = function() {
+   xCoordinate.value = parseFloat(0);
+   zCoordinate.value = parseFloat(0);
+//    for (i = 0; i < GoTofunction.length; i++) {
+//         GoTofunction[i].addEventListener('click', function() {
+//         pressed += this.id + "|";
+//         if (pressed === 'f4btn|Xbutton|numButton|AbsSet|') {
+//           alert('GoTofunction');
+//
+//         }
+//         // if (pressed.value.length >= 6) {
+//         //   //Start over
+//         //   pressed.value = "";
+//         // }
+//         console.log(pressed)
+//       }, false);
+// }
 
-function setAbsPos(element) {
-	let buffer = document.getElementById('coord-buffer');
-	if (selectedCoord == 1) {
-		let xvar = document.getElementById('xvar');
-		if (element.value === "RESTORE") {
-			xvar.value = "";
-		} else {
-			if (buffer.value.length <= 0) return;
-			xvar.value = buffer.value;
-			buffer.value = "";
-		}
-	} else if (selectedCoord == 2) {
-		let zvar = document.getElementById('zvar');
-		if (element.value === "RESTORE") {
-			zvar.value = "";
-		} else {
-			if (buffer.value.length <= 0) return;
-			zvar.value = buffer.value;
-			buffer.value = "";
-		}
-	}
-}
 
-/**
- * Code to switch the videos
- */
+   //console.log(GoTofunction[0].id);
+   // xCoordinate.value  = parseFloat(xCoordinate.value) + parseFloat(0.01);
 
-function switchVideo(element) {
-	videoCounter += 1;
-	let video_1 = document.getElementById("videoList_1");
-	let video_2 = document.getElementById("videoList_2");
-	let video_3 = document.getElementById("videoList_3");
-	let video_4 = document.getElementById("videoList_4");
-	let video_5 = document.getElementById("videoList_5");
-	let video_end = document.getElementById("videoList_end");
+ 	xbutton.addEventListener('click', function() {
+         resetColors();
+ 		     xbutton.style.backgroundColor = 'rgb(0,0,0)';
+         selectedCoord = 1;
+         controlPressed("X");
 
-	if (videoCounter == 1) {
-		video_1.style.display = "block";
-	} else if (videoCounter == 2) {
-		video_2.style.display = "block";
-		video_1.style.display = "none"
-	} else if (videoCounter == 3) {
-		video_3.style.display = "block";
-		video_2.style.display = "none"
-	} else if (videoCounter == 4) {
-		video_4.style.display = "block";
-		video_3.style.display = "none";
-	} else if (videoCounter == 5) {
-		video_5.style.display = "block";
-		video_4.style.display = "none";
 
-	} else if (videoCounter == 6) {
-		video_end.style.display = "block";
-		video_5.style.display = "none";
-	}
-}
+ 	});
+
+ 	zbutton.addEventListener('click', function() {
+         resetColors();
+ 		zbutton.style.backgroundColor = 'rgb(0,0,0)';
+         selectedCoord = 2;
+         controlPressed("Z");
+ 	});
+
+     powerfeedbutton.addEventListener('click', function() {
+         resetColors();
+         powerfeedbutton.style.backgroundColor = 'rgb(135,206,250)';
+         selectedCoord = 0;
+ 				powerfeedSelected =1;
+ 				setfuncitonbutton();
+     });
+
+     doonebutton.addEventListener('click', function() {
+         resetColors();
+         doonebutton.style.backgroundColor = 'rgb(135,206,250)';
+         selectedCoord = 0;
+ 				document.getElementById('f1').value = 'TAPER';
+ 				document.getElementById('f2').value = 'RADIUS';
+ 				document.getElementById('f3').value = 'FILLET';
+ 				document.getElementById('f4').value = '';
+ 				document.getElementById('f5').value = 'THREAD REPAIR';
+ 				document.getElementById('f6').value = '';
+ 				document.getElementById('f7').value = '';
+ 				document.getElementById('f8').value = 'RETURN';
+ 				dooneSelected = 1;
+     });
+
+     gotobutton.addEventListener('click', function() {
+         resetColors();
+ 				setfuncitonbutton();
+ 				gotoSelected = 1;
+         gotobutton.style.backgroundColor = 'rgb(135,206,250)';
+         selectedCoord = 0;
+     });
+
+     rpmbutton.addEventListener('click', function() {
+         resetColors();
+         rpmbutton.style.backgroundColor = 'rgb(135,206,250)';
+ 		selectedCoord = 3;
+ 				setfuncitonbutton();
+ 	});
+
+     toolretbutton.addEventListener('click', function() {
+     	if (videoCounter === 11) { // Only do this if on the tool index
+             resetColors();
+             toolretbutton.style.backgroundColor = 'rgb(135,206,250)';
+             selectedCoord = 0;
+ 					}
+      console.log("return clicked")
+
+
+ 			if (document.getElementById('f8').value == 'RETURN'){
+ 					resetfunctionbutton();
+          console.log("F8 return clicked")
+ 			}
+ 			else{
+ 					setfuncitonbutton();
+ 			}
+
+
+
+     });
+
+ 	// When value entered, want to exit that button's mode
+     restorebutton.addEventListener('click', function() {
+         resetColors();
+     });
+
+ 		coarsespeedbutton.addEventListener('click', function() {
+ 				if (coarsespeedbutton.value == 'F'){
+ 						coarsespeedbutton.value = 'C'
+ 				}
+ 				else if (coarsespeedbutton.value == 'C') {
+ 						coarsespeedbutton.value = 'F'
+
+ 				}
+ 				else{
+ 						coarsespeedbutton.value = 'F'
+ 				}
+ 		});
+
+ }
+
+ function setfuncitonbutton(){
+     	document.getElementById('f1').value = '';
+     	document.getElementById('f2').value = '';
+     	document.getElementById('f3').value = '';
+     	document.getElementById('f4').value = '';
+     	document.getElementById('f5').value = '';
+     	document.getElementById('f6').value = '';
+     	document.getElementById('f7').value = '';
+     	document.getElementById('f8').value = 'RETURN';
+ }
+
+ function resetfunctionbutton(){
+        console.log("resef called")
+       	document.getElementById('f1').value = '';
+       	document.getElementById('f2').value = 'POWER FEED';
+       	document.getElementById('f3').value = 'DO ONE';
+       	document.getElementById('f4').value = 'GO TO';
+       	document.getElementById('f5').value = 'MAX RPM';
+       	document.getElementById('f6').value = 'RETURN HOME';
+       	document.getElementById('f7').value = 'SPIN SPEED';
+       	document.getElementById('f8').value = 'TOOL #';
+       	gotoSelected = 0;
+       	dooneSelected = 0;
+       	powerfeedSelected = 0;
+        sequence = [];
+        sequenceIdx = 0;
+        pressed = "";
+ }
+
+
+ function resetColors() {
+     xbutton.style.backgroundColor = 'rgb(236,210,175)';
+     zbutton.style.backgroundColor = 'rgb(85,80,74)';
+     powerfeedbutton.style.backgroundColor = '';
+     doonebutton.style.backgroundColor = '';
+     gotobutton.style.backgroundColor = '';
+     rpmbutton.style.backgroundColor = '';
+     toolretbutton.style.backgroundColor = '';
+
+ }
+
+ /** Console controls */
+ function controlPressed(value) {
+       	completeTask(value);
+ }
+
+ function numberPressed(element){
+       	completeTask(element.value);
+       	getById('buffer').value = addNumber(buffer.value, element.value);
+ }
+
+ function addNumber(current, digit) {
+       	if (digit === '.' && current.indexOf(digit) >= 0) return current;
+       	if (current === '0') {
+       		if (digit === '0') return current;
+       		if (digit === '.') return current + digit;
+       		else return digit;
+       	}
+       	if (digit === '+/-') {
+       		if (current.length <= 0) return current;
+       		if (current.charAt(0) === '-') current = current.substring(1);
+       		else current = '-' + current;
+       		return current;
+       	}
+
+       	return current + digit;
+ }
+
+ function setAbsPos() {
+       	completeTask('ABS_SET');
+
+       	// Resetting button colors
+           resetColors();
+       		if (gotoSelected!=1 && dooneSelected!=1 && powerfeedSelected !=1){
+       			resetfunctionbutton();
+       		}
+
+       	let buffer = getById('buffer');
+       	if (buffer.value.length <= 0) return;
+
+       	if (selectedCoord == 0) {
+               buffer.value = '';
+       		return;
+           }
+       	let targetVar;
+       	if (selectedCoord == 1) targetVar = getById('xvar');
+       	else if (selectedCoord == 2) targetVar = getById('zvar');
+       	else if (selectedCoord == 3) targetVar = getById('rpm');
+
+       	targetVar.value = buffer.value;
+       	buffer.value = '';
+
+           selectedCoord = 0;
+ }
+
+ function setIncPos() {
+       	completeTask('INC_SET');
+
+       	// Resetting button colors
+           resetColors();
+       		resetfunctionbutton();
+
+       	let buffer = getById('buffer');
+       	if (buffer.value.length <= 0) return;
+
+       	if (selectedCoord == 0) {
+               buffer.value = '';
+       		return;
+           }
+       	let targetVar;
+       	if (selectedCoord == 1) targetVar = getById('xvar');
+       	else if (selectedCoord == 2) targetVar = getById('zvar');	// not using else here in case of other weird values
+           else if (selectedCoord == 3) targetVar = getById('rpm');
+
+       	if (targetVar.value.length <= 0) targetVar.value = 0;
+       	targetVar.value = parseFloat(buffer.value); // Do not want to add these, but if did: parseFloat(targetVar.value) +
+       	buffer.value = '';
+
+           selectedCoord = 0;
+ }
+
+ function restore() {
+         // Resetting button colors
+         resetColors();
+
+         let buffer = getById('buffer');
+
+     	// if (selectedCoord == 0) return; // Still need to reset value in buffer if necessary
+     	let targetVar;
+     	if (selectedCoord == 1) targetVar = getById('xvar');
+     	else if (selectedCoord == 2) targetVar = getById('zvar');	// not using else here in case of other weird values
+         else if (selectedCoord == 3) targetVar = getById('rpm');
+
+         buffer.value = '';
+     	   targetVar.value = '';
+
+         selectedCoord = 0;
+ }
+
+ function spindle(element) {
+ 	completeTask(element.value);
+ }
+
+ /** TODO: move essence to server */
+ function switchVideo() {
+       	let title = getById('title');
+       	let player = getById('player');
+       	let description = getById('description');
+
+       	if (videoCounter >= videos.length) {	// end of videos
+       		title.innerHTML = "You are done!\nRefresh the page and practice each again until you are comfortable with each.";
+       		player.style.display = "none";
+       		description.innerHTML = "";
+       		return;
+       	}
+       	// TODO: if end of videos, submit a feedback to server
+
+       	if (currentTasks) {
+       		alert('Have uncompleted tasks');	// bad practice
+       		return;	// task not finished
+       	}
+
+       	if (videoCounter++ == 0) {
+       		getById('cover').style.display = 'none';
+       		player.style.display = 'block';
+       	}
+
+       	let video = videos[videoCounter];
+       	title.innerHTML = video.title;
+       	player.src = video.src;
+       	description.innerHTML = video.text;
+
+       	if (video.tasks) {
+       		currentTasks = video.tasks;
+       	}
+ }
+
+ function nextTask() {
+       	taskIndex++;
+       	if (taskIndex >= currentTasks.length) {
+       		taskIndex = 0;
+       		currentTasks = null;		// meaning can submit
+       	}
+ }
+
+ function completeTask(value) {
+       	if (!currentTasks) return;	// no current tasks
+
+       	let task = currentTasks[taskIndex];
+       	if (task.press) {
+       		if (task.press === value) {
+       			if (task.conditions) {
+       				if (task.conditions.buffer) {
+       					if (task.conditions.buffer != getById('buffer').value) return;
+       				}
+       				// if (more task.conditions...)
+       			}
+       			console.log("Step completed!");
+       			nextTask();
+       			console.log(currentTasks);
+       			console.log(taskIndex);
+       		}
+       	}
+ }
+
+ function negBuffer() {
+     let buffer = getById('buffer');
+
+ 	buffer.value = -buffer.value;
+ }
+
+ /** Helpers */
+ function getById(id) {
+ 	return document.getElementById(id);
+ }
 
 /**
  * BabylonJS code
@@ -176,6 +449,7 @@ window.addEventListener('DOMContentLoaded', function(){
                 BABYLON.Tools.ToRadians(60),
                 40.0,box.position,scene);
             camera.attachControl(canvas,true);
+						camera.cameraDirection = camera.cameraDirection.add(new BABYLON.Vector3(0, 0, 10));
 
             // Keyboard events
             var clickedObject = 'box';
@@ -322,19 +596,19 @@ window.addEventListener('DOMContentLoaded', function(){
 							console.log(currentMesh.rotation);
 							if(currentMesh.rotation.x>currentMeshX){
 								if (currentMesh == wheel){
-									box2.position.x+=0.1;
+									box.position.x+=0.1;
 								}
 								else if (currentMesh == wheel2) {
-									box2.position.z-=0.1;
+									box.position.z-=0.1;
 								}
 
 							}
 							else if (currentMesh.rotation.x<currentMeshX) {
 								if (currentMesh == wheel){
-									box2.position.x-=0.1;
+									box.position.x-=0.1;
 								}
 								else if (currentMesh == wheel2) {
-									box2.position.z+=0.1;
+									box.position.z+=0.1;
 								}
 							}
 
@@ -385,6 +659,82 @@ window.addEventListener('DOMContentLoaded', function(){
 						 fwdOn = 1;
 					 }
 				 });
+
+// Implement GOTO animation;
+         for (i = 0; i < GoTofunction.length; i++) {
+              GoTofunction[i].addEventListener('click', function() {
+              if (this.id != sequence[sequenceIdx-1]){
+                sequence.push(this.id);
+                pressed += this.id;
+                sequenceIdx +=1;
+              }
+
+              if (pressed == "f4btnXbuttonnumButtonAbsSetZbuttonnumButtonAbsSet"
+                  || pressed == "f4btnZbuttonnumButtonAbsSetXbuttonnumButtonAbsSet"){
+                    sequence = [];
+                    sequenceIdx = 0;
+                    var GoToXPosition = parseFloat(xCoordinate.value);
+                    var GoToZPosition = parseFloat(zCoordinate.value);
+                    // console.log(GoToXPosition);
+                    // console.log(GoToZPosition);
+
+                    var frameRate1 = 10;
+                    var GoToAnimationX = new BABYLON.Animation('GotoAnimation','position.z',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    console.log(box.position.z);
+                    var keyFrames = [];
+                    keyFrames.push({
+                        frame: 0,
+                        value: box.position.z
+                    });
+
+                    keyFrames.push({
+                        frame: 2 * frameRate1,
+                        value: GoToXPosition
+                    });
+
+                    var itHasStopped = function () {
+                      alert('itHasStopped func reports the animation stopped');
+                      box.position.z = GoToXPosition;
+                    }
+
+                    GoToAnimationX.setKeys(keyFrames);
+
+                    var GoToAnimationZ = new BABYLON.Animation('GotoAnimationZ','position.x',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    console.log(box.position.x);
+                    var keyFrames2 = [];
+                    keyFrames2.push({
+                        frame: 0,
+                        value: box.position.x
+                    });
+
+                    keyFrames2.push({
+                        frame: 2 * frameRate1,
+                        value: GoToZPosition
+                    });
+
+                    var itHasStopped2 = function () {
+
+                      box.position.x = GoToZPosition;
+                      // box.animations.push(GoToAnimationX);
+                      // var animatable = scene.beginAnimation(box, 0, 2 * frameRate1, false, 1, itHasStopped);
+                      scene.beginDirectAnimation(box, [GoToAnimationX], 0, 2 * frameRate, false, 1, itHasStopped);
+                    }
+
+                    GoToAnimationZ.setKeys(keyFrames2);
+
+                    box.animations.push(GoToAnimationZ);
+                    // var animatable = scene.beginAnimation(box, 0, 2 * frameRate1, false, 1, itHasStopped2);
+                    scene.beginDirectAnimation(box, [GoToAnimationZ], 0, 2 * frameRate, false, 1, itHasStopped2);
+
+                  }
+
+
+
+              console.log(pressed);
+              // console.log(abSetPressed)
+            }, false);
+      }
+
 				return scene;
 		}
 
@@ -525,9 +875,14 @@ function dragOne() {
 
     var calc = (rot_one * Math.PI + rad_adj);
 
-    console.log(box.position.z + "|" + rect_xfr + "|" + (box.position.z-rect_xfr));
-
+    //console.log(box.position.z + "|" + rect_xfr + "|" + (box.position.z-rect_xfr));
+    //var currentPosistionx = box.position.z;
     mod_box_z(-(box.position.z-rect_xfr));
+    //console.log(box.position);
+
+    console.log(box.position.z);
+    xCoordinate.value = parseFloat(box.position.z);
+
 }
 
 var rot_two = 0;
@@ -571,9 +926,12 @@ function dragTwo() {
 
     var calc = (rot_two * Math.PI + rad_adj);
 
-    console.log(box.position.x + "|" + rect_xfr + "|" + (box.position.x-rect_xfr));
-
+    //console.log(box.position.x + "|" + rect_xfr + "|" + (box.position.x-rect_xfr));
+    //var currentPosistionx = box.position.x;
     mod_box_x(-(box.position.x-rect_xfr));
+    zCoordinate.value = parseFloat(box.position.x);
+
+
 }
 
 /**
@@ -597,9 +955,11 @@ function mod_box_x(delta) {
                 }
             }
 
-            console.log(delta);
-            box.position.x+=delta;
-            console.log(delta);
+
+            box.position.x+= delta;
+            // console.log(delta);
+            // console.log('--------------');
+            // console.log(2*delta);
         }
 
 
@@ -621,9 +981,11 @@ function mod_box_x(delta) {
         }
 
 
-        console.log(delta);
+        //console.log(delta);
         box.position.x+=delta;
-        console.log(delta);
+        // console.log(delta);
+        // console.log('--------------');
+        // console.log(2*delta);
     }
 }
 
