@@ -10,6 +10,8 @@
  let pressed = '';
  let sequence = [];
  let sequenceIdx = 0;
+ let gotoLimitx = 1000;
+ let gotoLimitz = 1000;
 
  let xbutton = getById('Xbutton');
  let zbutton = getById('Zbutton');
@@ -33,24 +35,6 @@
  window.onload = function() {
    xCoordinate.value = parseFloat(0);
    zCoordinate.value = parseFloat(0);
-//    for (i = 0; i < GoTofunction.length; i++) {
-//         GoTofunction[i].addEventListener('click', function() {
-//         pressed += this.id + "|";
-//         if (pressed === 'f4btn|Xbutton|numButton|AbsSet|') {
-//           alert('GoTofunction');
-//
-//         }
-//         // if (pressed.value.length >= 6) {
-//         //   //Start over
-//         //   pressed.value = "";
-//         // }
-//         console.log(pressed)
-//       }, false);
-// }
-
-
-   //console.log(GoTofunction[0].id);
-   // xCoordinate.value  = parseFloat(xCoordinate.value) + parseFloat(0.01);
 
  	xbutton.addEventListener('click', function() {
          resetColors();
@@ -174,6 +158,8 @@
         sequence = [];
         sequenceIdx = 0;
         pressed = "";
+        gotoLimitx = 1000;
+        gotoLimitz = 1000;
  }
 
 
@@ -593,9 +579,11 @@ window.addEventListener('DOMContentLoaded', function(){
 							currentMeshX = currentMesh.rotation.x ;
 							var newRotation = rotationInit - dragDiff.x / 170;
 							currentMesh.rotation.x = newRotation;
-							console.log(currentMesh.rotation);
+							console.log(box.position);
+              console.log('box------------limitx')
+              console.log(gotoLimitx);
 							if(currentMesh.rotation.x>currentMeshX){
-								if (currentMesh == wheel){
+								if (currentMesh == wheel  && box.position.x < gotoLimitx){
 									box.position.x+=0.1;
 								}
 								else if (currentMesh == wheel2) {
@@ -607,7 +595,7 @@ window.addEventListener('DOMContentLoaded', function(){
 								if (currentMesh == wheel){
 									box.position.x-=0.1;
 								}
-								else if (currentMesh == wheel2) {
+								else if (currentMesh == wheel2&&box.position.z < gotoLimitz) {
 									box.position.z+=0.1;
 								}
 							}
@@ -660,7 +648,7 @@ window.addEventListener('DOMContentLoaded', function(){
               fwdOn = 0;
           });
 
-// Implement GOTO animation;
+// Implement GOTO;
          for (i = 0; i < GoTofunction.length; i++) {
               GoTofunction[i].addEventListener('click', function() {
                 console.log('---------------');
@@ -679,64 +667,66 @@ window.addEventListener('DOMContentLoaded', function(){
                     sequenceIdx = 0;
                     var GoToXPosition = parseFloat(xCoordinate.value);
                     var GoToZPosition = parseFloat(zCoordinate.value);
-                    // console.log(GoToXPosition);
-                    // console.log(GoToZPosition);
-
-                    var frameRate1 = 10;
-                    var GoToAnimationX = new BABYLON.Animation('GotoAnimation','position.z',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                    console.log(box.position.z);
-                    var keyFrames = [];
-                    keyFrames.push({
-                        frame: 0,
-                        value: box.position.z
-                    });
-
-                    keyFrames.push({
-                        frame: 2 * frameRate1,
-                        value: GoToXPosition
-                    });
-
-                    var itHasStopped = function () {
-                      alert('itHasStopped func reports the animation stopped');
-                      box.position.z = GoToXPosition;
-                    }
-
-                    GoToAnimationX.setKeys(keyFrames);
-
-                    var GoToAnimationZ = new BABYLON.Animation('GotoAnimationZ','position.x',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                    console.log(box.position.x);
-                    var keyFrames2 = [];
-                    keyFrames2.push({
-                        frame: 0,
-                        value: box.position.x
-                    });
-
-                    keyFrames2.push({
-                        frame: 2 * frameRate1,
-                        value: GoToZPosition
-                    });
-
-                    var itHasStopped2 = function () {
-
-                      box.position.x = GoToZPosition;
-                      // box.animations.push(GoToAnimationX);
-                      // var animatable = scene.beginAnimation(box, 0, 2 * frameRate1, false, 1, itHasStopped);
-                      scene.beginDirectAnimation(box, [GoToAnimationX], 0, 2 * frameRate, false, 1, itHasStopped);
-                    }
-
-                    GoToAnimationZ.setKeys(keyFrames2);
-
-                    box.animations.push(GoToAnimationZ);
-                    // var animatable = scene.beginAnimation(box, 0, 2 * frameRate1, false, 1, itHasStopped2);
-                    scene.beginDirectAnimation(box, [GoToAnimationZ], 0, 2 * frameRate, false, 1, itHasStopped2);
-
+                    gotoLimitx = GoToZPosition;
+                    gotoLimitz = GoToXPosition;
                   }
-
-
-
               console.log(pressed);
               // console.log(abSetPressed)
             }, false);
+
+            //Implementation of Return Home funciton.
+            document.getElementById("f6btn").addEventListener("click",function () {
+                console.log("return home clicked");
+                var frameRate1 = 10;
+                var GoToAnimationX = new BABYLON.Animation('GotoAnimation','position.z',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                console.log(box.position.z);
+                var keyFrames = [];
+                keyFrames.push({
+                    frame: 0,
+                    value: box.position.z
+                });
+
+                keyFrames.push({
+                    frame: 2 * frameRate1,
+                    value: 0
+                });
+
+                var itHasStopped = function () {
+                  //alert('itHasStopped func reports the animation stopped');
+                  box.position.z = 0;
+                  xCoordinate.value = parseFloat(box.position.z);
+                }
+
+                GoToAnimationX.setKeys(keyFrames);
+
+                var GoToAnimationZ = new BABYLON.Animation('GotoAnimationZ','position.x',frameRate1,BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                console.log(box.position.x);
+                var keyFrames2 = [];
+                keyFrames2.push({
+                    frame: 0,
+                    value: box.position.x
+                });
+
+                keyFrames2.push({
+                    frame: 2 * frameRate1,
+                    value: 0
+                });
+
+                var itHasStopped2 = function () {
+                  box.position.x = 0;
+                  zCoordinate.value = parseFloat(box.position.x);
+                  scene.beginDirectAnimation(box, [GoToAnimationX], 0, 2 * frameRate, false, 1, itHasStopped);
+                }
+
+                GoToAnimationZ.setKeys(keyFrames2);
+
+                box.animations.push(GoToAnimationZ);
+                // var animatable = scene.beginAnimation(box, 0, 2 * frameRate1, false, 1, itHasStopped2);
+                scene.beginDirectAnimation(box, [GoToAnimationZ], 0, 2 * frameRate, false, 1, itHasStopped2);
+
+
+
+             });
       }
 
 				return scene;
