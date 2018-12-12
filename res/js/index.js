@@ -958,15 +958,8 @@ function mod_box_x(delta) {
                     cut_made = true;
                 }
             }
-
-
             box.position.x+= delta;
-            // console.log(delta);
-            // console.log('--------------');
-            // console.log(2*delta);
         }
-
-
     } else {
         if (cut_made && Math.abs(delta) > .01) { // the math.abs(delta) accounts for moving
                                                  // too quickly and creating a new cylinder
@@ -983,13 +976,7 @@ function mod_box_x(delta) {
 
             cyl2 = tmp_cyl;
         }
-
-
-        //console.log(delta);
         box.position.x+=delta;
-        // console.log(delta);
-        // console.log('--------------');
-        // console.log(2*delta);
     }
 }
 
